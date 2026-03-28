@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Play,
   Download,
@@ -13,6 +14,8 @@ import {
   Volume2,
   VolumeX,
   PieChart,
+  X,
+  ShieldAlert,
   Send,
   Heart,
 } from 'lucide-react'
@@ -23,8 +26,8 @@ import addAppsGif from './assets/addapps-gif.gif'
 import runGif from './assets/run-gif.gif'
 import './App.css'
 
-// ── Replace with your YouTube video ID when ready ──
 const YOUTUBE_VIDEO_ID = 'qwNZsc8DGcs'
+const DOWNLOAD_URL = 'https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe'
 
 // ── Replace with your Web3Forms access key (see setup steps below) ──
 const WEB3FORMS_KEY = '8de851bc-4c55-4744-a875-063bad661710'
@@ -33,6 +36,7 @@ function App() {
   const [feedbackSent, setFeedbackSent] = useState(false)
   const [feedbackError, setFeedbackError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [videoActive, setVideoActive] = useState(false)
   const [muted, setMuted] = useState(true)
   const previewRef = useRef(null)
@@ -140,7 +144,7 @@ function App() {
             <li><a href="#use-cases">Use Cases</a></li>
             <li><a href="#feedback">Send Feedback</a></li>
             <li>
-              <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="nav-cta">
+              <a href={DOWNLOAD_URL} onClick={(e) => { e.preventDefault(); setShowDownloadModal(true); window.open(DOWNLOAD_URL, '_blank'); }} className="nav-cta">
                 Download
               </a>
             </li>
@@ -171,7 +175,7 @@ function App() {
         </p>
 
         <div className="hero-buttons">
-          <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="btn-primary">
+          <a href={DOWNLOAD_URL} onClick={(e) => { e.preventDefault(); setShowDownloadModal(true); window.open(DOWNLOAD_URL, '_blank'); }} className="btn-primary">
             <Download size={18} />
             Download for Free
           </a>
@@ -416,7 +420,7 @@ function App() {
           your day.
         </p>
         <div className="cta-buttons">
-          <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="btn-primary">
+          <a href={DOWNLOAD_URL} onClick={(e) => { e.preventDefault(); setShowDownloadModal(true); window.open(DOWNLOAD_URL, '_blank'); }} className="btn-primary">
             <Download size={18} />
             Download for Windows
           </a>
@@ -515,9 +519,37 @@ function App() {
             <li><a href="https://github.com/Gio-angel/starterX-releases" target="_blank" rel="noopener noreferrer">GitHub</a></li>
             <li><a href="#">Twitter</a></li>
             <li><a href="#feedback">Feedback</a></li>
+            <li><Link to="/terms">Terms of Service</Link></li>
+            <li><Link to="/privacy">Privacy Policy</Link></li>
           </ul>
         </div>
       </footer>
+
+      {/* ── DOWNLOAD MODAL ── */}
+      {showDownloadModal && (
+        <div className="modal-overlay" onClick={() => setShowDownloadModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowDownloadModal(false)} aria-label="Close">
+              <X size={20} />
+            </button>
+            <div className="modal-icon">
+              <Download size={28} />
+            </div>
+            <h3>Thank you for downloading starterX!</h3>
+            <p>Your download should start automatically.</p>
+            <div className="modal-warning">
+              <ShieldAlert size={18} />
+              <div>
+                <strong>Windows SmartScreen notice</strong>
+                <p>
+                  Windows may show a "Windows protected your PC" warning because the app isn't code-signed yet.
+                  Click <strong>"More info"</strong> then <strong>"Run anyway"</strong> to install safely.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
