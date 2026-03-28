@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Play,
   Download,
@@ -9,21 +9,119 @@ import {
   Zap,
   Settings,
   Monitor,
-  Film,
   Menu,
+  Volume2,
+  VolumeX,
   PieChart,
   Send,
   Heart,
 } from 'lucide-react'
 import logo from './assets/starterx-logo.ico'
+import bannerGif from './assets/banner-gif.gif'
+import createGif from './assets/create-gif.gif'
+import addAppsGif from './assets/addapps-gif.gif'
+import runGif from './assets/run-gif.gif'
 import './App.css'
+
+// ── Replace with your YouTube video ID when ready ──
+const YOUTUBE_VIDEO_ID = 'qwNZsc8DGcs'
+
+// ── Replace with your Web3Forms access key (see setup steps below) ──
+const WEB3FORMS_KEY = '8de851bc-4c55-4744-a875-063bad661710'
 
 function App() {
   const [feedbackSent, setFeedbackSent] = useState(false)
+  const [feedbackError, setFeedbackError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [videoActive, setVideoActive] = useState(false)
+  const [muted, setMuted] = useState(true)
+  const previewRef = useRef(null)
+  const playerRef = useRef(null)
 
-  function handleFeedback(e) {
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVideoActive(true) },
+      { threshold: 0.3 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Load YouTube IFrame API and create player when video becomes active
+  useEffect(() => {
+    if (!videoActive) return
+
+    function createPlayer() {
+      playerRef.current = new window.YT.Player('yt-player', {
+        videoId: YOUTUBE_VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          loop: 1,
+          playlist: YOUTUBE_VIDEO_ID,
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+        },
+      })
+    }
+
+    if (window.YT && window.YT.Player) {
+      createPlayer()
+    } else {
+      const tag = document.createElement('script')
+      tag.src = 'https://www.youtube.com/iframe_api'
+      document.head.appendChild(tag)
+      window.onYouTubeIframeAPIReady = createPlayer
+    }
+  }, [videoActive])
+
+  const toggleMute = useCallback(() => {
+    const p = playerRef.current
+    if (!p) return
+    if (muted) {
+      p.unMute()
+      p.setVolume(25)
+    } else {
+      p.mute()
+    }
+    setMuted(!muted)
+  }, [muted])
+
+  async function handleFeedback(e) {
     e.preventDefault()
-    setFeedbackSent(true)
+    setSubmitting(true)
+    setFeedbackError('')
+
+    const form = e.target
+    const data = {
+      access_key: WEB3FORMS_KEY,
+      subject: 'starterX Landing Page Feedback',
+      name: form.name.value,
+      email: form.email.value,
+      role: form.role.value,
+      message: form.message.value,
+    }
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      const result = await res.json()
+      if (result.success) {
+        setFeedbackSent(true)
+      } else {
+        setFeedbackError('Something went wrong. Please try again.')
+      }
+    } catch {
+      setFeedbackError('Network error. Please check your connection and try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -42,7 +140,7 @@ function App() {
             <li><a href="#use-cases">Use Cases</a></li>
             <li><a href="#feedback">Send Feedback</a></li>
             <li>
-              <a href="#download" className="nav-cta">
+              <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="nav-cta">
                 Download
               </a>
             </li>
@@ -56,6 +154,7 @@ function App() {
 
       {/* ── HERO ── */}
       <section className="hero">
+        <img src={bannerGif} className="hero-bg-gif" alt="" aria-hidden="true" />
         <div className="hero-badge">
           <span className="hero-badge-dot" />
           Now available for Windows
@@ -67,12 +166,12 @@ function App() {
         </h1>
 
         <p>
-          Create scenarios, drag in your apps, add delays and terminal commands.
+          Create app launching scenarios, block by block. The scenario is automatically saved and ready-to-launch whenever YOU want.
           One button press and your whole workstation fires up — every time.
         </p>
 
         <div className="hero-buttons">
-          <a href="#download" className="btn-primary">
+          <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="btn-primary">
             <Download size={18} />
             Download for Free
           </a>
@@ -189,16 +288,12 @@ function App() {
               <div className="step-number">1</div>
               <h3>Create a Scenario</h3>
               <p>
-                Name your scenario — "Morning Dev", "Gaming Night", "Design
-                Work" — whatever fits your routine.
+                Name your new scenario — "Morning Dev", "Gaming Night", "Design
+                Work" — whatever fits your routine. It is automatically saved and ready in the starterX app.
               </p>
             </div>
-            {/* ▼ REPLACE: Short video or screenshot showing scenario creation */}
             <div className="step-media">
-              <div className="placeholder-label">
-                <Film size={24} />
-                Short clip or screenshot — creating a scenario
-              </div>
+              <img src={createGif} alt="Creating a scenario in starterX" />
             </div>
           </div>
 
@@ -209,15 +304,11 @@ function App() {
               <h3>Add Apps & Commands</h3>
               <p>
                 Drag in app shortcuts, add terminal commands, and set
-                delays between them. Build the perfect launch sequence.
+                delays between them. Build the perfect launch sequence. You can edit a scenario whenever you want.
               </p>
             </div>
-            {/* ▼ REPLACE: Short video or screenshot showing drag & drop + commands */}
             <div className="step-media">
-              <div className="placeholder-label">
-                <Film size={24} />
-                Short clip or screenshot — adding apps & commands
-              </div>
+              <img src={addAppsGif} alt="Adding apps and commands in starterX" />
             </div>
           </div>
 
@@ -231,12 +322,8 @@ function App() {
                 commands. Your workstation is ready in seconds.
               </p>
             </div>
-            {/* ▼ REPLACE: Short video or screenshot showing one-click launch */}
             <div className="step-media">
-              <div className="placeholder-label">
-                <Film size={24} />
-                Short clip or screenshot — launching a scenario
-              </div>
+              <img src={runGif} alt="Launching a scenario in starterX" />
             </div>
           </div>
         </div>
@@ -255,12 +342,24 @@ function App() {
             Designed to stay out of your way — set it up once, launch forever.
           </p>
 
-          {/* ▼ REPLACE: Full app screenshot or UI walkthrough video (16:9) */}
-          <div className="preview-media">
-            <div className="placeholder-label">
-              <Monitor size={24} />
-              App screenshot or UI walkthrough video — 16:9
-            </div>
+          <div className="preview-media" ref={previewRef}>
+            {videoActive ? (
+              <>
+                <div id="yt-player" />
+                <button
+                  className="volume-toggle"
+                  onClick={toggleMute}
+                  aria-label={muted ? 'Unmute video' : 'Mute video'}
+                >
+                  {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                  {muted ? 'Unmute' : 'Mute'}
+                </button>
+              </>
+            ) : (
+              <div className="placeholder-label">
+                <Monitor size={24} />
+              </div>
+            )}
           </div>
         </section>
       </div>
@@ -317,11 +416,11 @@ function App() {
           your day.
         </p>
         <div className="cta-buttons">
-          <a href="#" className="btn-primary">
+          <a href="https://github.com/Gio-angel/starterX-releases/releases/latest/download/starterX.Installer.exe" className="btn-primary">
             <Download size={18} />
             Download for Windows
           </a>
-          <a href="#" className="btn-secondary">
+          <a href="https://github.com/Gio-angel/starterX-releases" target="_blank" rel="noopener noreferrer" className="btn-secondary">
             View on GitHub
           </a>
         </div>
@@ -351,17 +450,17 @@ function App() {
               <div className="feedback-row">
                 <div className="feedback-field">
                   <label htmlFor="fb-name">Name</label>
-                  <input id="fb-name" type="text" placeholder="Your name" />
+                  <input id="fb-name" name="name" type="text" placeholder="Your name" />
                 </div>
                 <div className="feedback-field">
                   <label htmlFor="fb-email">Email</label>
-                  <input id="fb-email" type="email" placeholder="you@example.com" />
+                  <input id="fb-email" name="email" type="email" placeholder="you@example.com" />
                 </div>
               </div>
 
               <div className="feedback-field">
                 <label htmlFor="fb-role">I am a...</label>
-                <select id="fb-role" defaultValue="">
+                <select id="fb-role" name="role" defaultValue="">
                   <option value="" disabled>Select your profile</option>
                   <option value="developer">Developer</option>
                   <option value="gamer">Gamer</option>
@@ -375,14 +474,21 @@ function App() {
                 <label htmlFor="fb-message">Your feedback</label>
                 <textarea
                   id="fb-message"
+                  name="message"
                   placeholder="What do you like? What's missing? What would make starterX better for you?"
                   required
                 />
               </div>
 
-              <button type="submit" className="feedback-submit">
+              {feedbackError && (
+                <p style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>
+                  {feedbackError}
+                </p>
+              )}
+
+              <button type="submit" className="feedback-submit" disabled={submitting}>
                 <Send size={16} />
-                Send Feedback
+                {submitting ? 'Sending...' : 'Send Feedback'}
               </button>
 
               <p className="feedback-note">
@@ -406,7 +512,7 @@ function App() {
           </span>
 
           <ul className="footer-links">
-            <li><a href="#">GitHub</a></li>
+            <li><a href="https://github.com/Gio-angel/starterX-releases" target="_blank" rel="noopener noreferrer">GitHub</a></li>
             <li><a href="#">Twitter</a></li>
             <li><a href="#feedback">Feedback</a></li>
           </ul>
