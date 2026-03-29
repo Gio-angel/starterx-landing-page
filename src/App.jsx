@@ -161,7 +161,7 @@ function App() {
         <img src={bannerGif} className="hero-bg-gif" alt="" aria-hidden="true" />
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          Now available for Windows
+          Now available for Windows & Mac
         </div>
 
         <h1>
@@ -422,7 +422,7 @@ function App() {
         <div className="cta-buttons">
           <a href={DOWNLOAD_URL} onClick={(e) => { e.preventDefault(); setShowDownloadModal(true); window.open(DOWNLOAD_URL, '_blank'); }} className="btn-primary">
             <Download size={18} />
-            Download for Windows
+            Download for Windows & Mac
           </a>
           <a href="https://github.com/Gio-angel/starterX-releases" target="_blank" rel="noopener noreferrer" className="btn-secondary">
             View on GitHub
