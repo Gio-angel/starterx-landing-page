@@ -25,7 +25,7 @@ function Privacy() {
         <h2>2. What Data Is Collected and Where</h2>
 
         <h3>2.1 On the Landing Page</h3>
-        <p>When you submit your email address through the contact or newsletter form on the starterX landing page, I collect:</p>
+        <p>When you submit your email address through the contact form on the starterX landing page, I collect:</p>
         <ul>
           <li>Your <strong>email address</strong></li>
         </ul>
