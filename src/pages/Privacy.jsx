@@ -56,10 +56,9 @@ function Privacy() {
         <h2>4. How I Use Your Email Address</h2>
         <p>Your email address, if provided voluntarily through the landing page form, is used only to:</p>
         <ul>
-          <li>Notify you of starterX updates and new releases</li>
-          <li>Share important announcements related to the application</li>
+          <li>Indicate the sender of the respective feedback in the mail</li>
         </ul>
-        <p>I will never sell, rent, or share your email address with any third party for marketing purposes.</p>
+        <p>I will never sell, rent, or share your email address with any third party for marketing purposes. I will never send spam or promotion emails.</p>
 
         <hr />
 
